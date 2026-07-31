@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Profilni Tahrirlash — Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                
+                <!-- Card Header -->
+                <div class="bg-primary text-white p-4 text-center">
+                    <h4 class="fw-bold mb-1"><i class="bi bi-pencil-square me-2"></i>Profilni tahrirlash</h4>
+                    <p class="mb-0 opacity-75">Shaxsiy ma'lumotlaringizni yangilang</p>
+                </div>
+
+                <!-- Form Body -->
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- User ma'lumotlari formasi -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Tizim ma'lumotlari</h6>
+                            {{ u_form|crispy }}
+                        </div>
+
+                        <!-- Profil qo'shimcha ma'lumotlari (Rasm, telefon va h.k.) -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Shaxsiy ma'lumotlar</h6>
+                            {{ p_form|crispy }}
+                        </div>
+
+                        <!-- Tugmalar -->
+                        <div class="d-flex gap-2 pt-2">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-light border rounded-pill w-50 fw-medium">
+                                Bekor qilish
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill w-50 fw-medium py-2">
+                                Saqlash
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}s

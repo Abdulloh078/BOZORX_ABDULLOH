@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Mening Profilim | Marketplace{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-3">
+    <div class="col-md-4">
+        <div class="card card-custom p-4 text-center">
+            <img src="{{ profile.avatar.url }}" class="rounded-circle mx-auto mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--border-color);">
+            <h4 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h4>
+            <p class="text-muted small mb-2">@{{ user.username }}</p>
+            <span class="badge bg-primary mb-3">{{ user.get_user_type_display }}</span>
+            <hr>
+            <div class="text-start">
+                <p class="small mb-1"><strong>Balans:</strong> {{ profile.balance }} so'm</p>
+                <p class="small mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                <p class="small mb-1"><strong>Tel:</strong> {{ user.phone|default:"Kiritilmagan" }}</p>
+                <p class="small mb-0"><strong>Telegram:</strong> {{ user.telegram_username|default:"Kiritilmagan" }}</p>
+            </div>
+            <a href="{% url 'accounts:seller_store' user.username %}" class="btn btn-outline-dark btn-sm w-100 mt-3">Do'kon sahifamni ko'rish</a>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card card-custom p-4">
+            <h4 class="fw-bold mb-4">Profil Sozlamalari</h4>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h6 class="fw-bold text-primary mb-3">Shaxsiy ma'lumotlar</h6>
+                {{ u_form|crispy }}
+                <hr class="my-4">
+                <h6 class="fw-bold text-primary mb-3">Do'kon va Manzil ma'lumotlari</h6>
+                {{ p_form|crispy }}
+                <button type="submit" class="btn btn-primary-custom mt-3">O'zgarishlarni saqlash</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

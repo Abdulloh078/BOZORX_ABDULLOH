@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }} — Shaxsiy kabinet{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Chap tomonda: Profil kartochkasi -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 text-center p-3">
+                <div class="mb-3">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="rounded-circle img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto fs-1" style="width: 120px; height: 120px;">
+                            {{ user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+                <h4>{{ user.get_full_name|default:user.username }}</h4>
+                <p class="text-muted mb-2">@{{ user.username }}</p>
+                <p class="text-muted"><i class="bi bi-telephone"></i> {{ user.phone_number|default:"Raqam kiritilmagan" }}</p>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'users:profile_edit' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil-square"></i> Profilni tahrirlash
+                    </a>
+                    <a href="{% url 'products:product_create' %}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Yangi e'lon qo'shish
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- O'ng tomonda: Foydalanuvchining e'lonlari -->
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Mening e'lonlarim ({{ products_count }})</h4>
+            </div>
+
+            {% if products %}
+                <div class="row row-cols-1 row-cols-md-2 g-3">
+                    {% for product in products %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm border-0">
+                                {% if product.images.first %}
+                                    <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light text-center py-5 text-muted" style="height: 180px;">Rasm yo'q</div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title text-truncate">
+                                        <a href="{% url 'products:product_detail' product.slug %}" class="text-decoration-none text-dark">
+                                            {{ product.title }}
+                                        </a>
+                                    </h6>
+                                    <p class="card-text fw-bold text-primary mb-1">{{ product.price }} so'm</p>
+                                    <span class="badge {% if product.status == 'ACTIVE' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                        {{ product.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="card-footer bg-white border-0 d-flex justify-content-between">
+                                    <small class="text-muted"><i class="bi bi-eye"></i> {{ product.views_count }}</small>
+                                    <small class="text-muted">{{ product.created_at|date:"d.m.Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center py-4">
+                    <h5>Sizda hali e'lonlar yo'q</h5>
+                    <p class="mb-3">Sotmoqchi bo'lgan buyumingiz bo'lsa, e'lon joylang!</p>
+                    <a href="{% url 'products:product_create' %}" class="btn btn-primary">E'lon joylash</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

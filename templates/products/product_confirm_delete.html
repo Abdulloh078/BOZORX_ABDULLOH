@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}E'lonni o'chirish — Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4">
+                <div class="text-danger mb-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                </div>
+                <h4 class="fw-bold mb-2">E'lonni o'chirishni xohlaysizmi?</h4>
+                <p class="text-muted">
+                    "<strong>{{ product.title }}</strong>" e'loni butunlay o'chiriladi va uni qayta tiklab bo'lmaydi.
+                </p>
+                <form method="post" class="d-flex justify-content-center gap-3 mt-4">
+                    {% csrf_token %}
+                    <a href="{% url 'products:product_detail' product.slug %}" class="btn btn-light border px-4 rounded-pill fw-medium">
+                        Bekor qilish
+                    </a>
+                    <button type="submit" class="btn btn-danger px-4 rounded-pill fw-medium">
+                        Ha, o'chirilsin
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% if request.user == product.author %}
+    <div class="d-flex gap-2 my-3">
+        <a href="{% url 'products:product_update' product.slug %}" class="btn btn-outline-primary btn-sm rounded-pill fw-medium px-3">
+            <i class="bi bi-pencil me-1"></i> Tahrirlash
+        </a>
+        <a href="{% url 'products:product_delete' product.slug %}" class="btn btn-outline-danger btn-sm rounded-pill fw-medium px-3">
+            <i class="bi bi-trash me-1"></i> O'chirish
+        </a>
+    </div>
+{% endif %}

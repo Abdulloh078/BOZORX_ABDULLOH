@@ -1,0 +1,47 @@
+<!-- IZOH QOLDIRISH FORMASI -->
+<div class="card border-0 shadow-sm rounded-4 mt-4">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Izohlar ({{ reviews.count }})</h5>
+
+        {% if request.user.is_authenticated %}
+            <form method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Baho</label>
+                        {{ form.rating }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Izohingiz</label>
+                        {{ form.comment }}
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 btn-sm">
+                            Yuborish
+                        </button>
+                    </div>
+                </div>
+            </form>
+        {% else %}
+            <div class="alert alert-light text-center border mb-4">
+                Izoh qoldirish uchun <a href="{% url 'accounts:login' %}" class="fw-bold">tizimga kiring</a>.
+            </div>
+        {% endif %}
+
+        <!-- IZOHLAR RO'YXATI -->
+        <div class="reviews-list">
+            {% for review in reviews %}
+                <div class="border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-dark">{{ review.user.username }}</strong>
+                        <span class="text-warning fw-bold">{{ review.rating }} ★</span>
+                    </div>
+                    <p class="text-muted small mb-1">{{ review.comment }}</p>
+                    <small class="text-secondary" style="font-size: 0.75rem;">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+            {% empty %}
+                <p class="text-muted text-center py-3 mb-0">Hali hech kim izoh qoldirmagan. Birinchi bo'lib izoh qoldiring!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>

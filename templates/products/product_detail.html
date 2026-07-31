@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.title }} | Marketplace{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-3">
+    <!-- Chap tomon: Rasmlar, Tavsif va Izohlar -->
+    <div class="col-lg-8">
+        <!-- MAHSULOT MA'LUMOTLARI -->
+        <div class="card card-custom p-3 mb-4">
+            <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+                <div class="carousel-inner rounded">
+                    {% for img in product.images.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{{ img.image.url }}" class="d-block w-100" style="max-height: 450px; object-fit: contain; background: #f8f9fa;">
+                        </div>
+                    {% empty %}
+                        <div class="carousel-item active">
+                            <div class="bg-secondary text-white text-center py-5">Rasm mavjud emas</div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if product.images.count > 1 %}
+                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                    </button>
+                {% endif %}
+            </div>
+
+            <h3 class="fw-bold">{{ product.title }}</h3>
+            <h4 class="text-primary fw-bold mb-3">{{ product.price }} so'm {% if product.is_negotiable %}<span class="fs-6 text-muted">(Kelishtiriladi)</span>{% endif %}</h4>
+            <p class="text-muted small">📍 {{ product.region }}, {{ product.city }} • {{ product.created_at|date:"d-E, Y" }} • 👁️ {{ product.views_count }} marta ko'rildi</p>
+            <hr>
+            <h5 class="fw-bold mb-3">Tavsif</h5>
+            <p style="white-space: pre-line;">{{ product.description }}</p>
+        </div>
+
+        <!-- IZOHLAR VA BAHOLASH BO'LIMI -->
+        <div class="card card-custom p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h5 class="fw-bold mb-0">Izohlar va Baholar ({{ reviews.count }})</h5>
+                <span class="text-warning fw-bold fs-5">
+                    {% if avg_rating > 0 %}
+                        ⭐ {{ avg_rating }} / 5
+                    {% else %}
+                        Hali baholanmagan
+                    {% endif %}
+                </span>
+            </div>
+
+            <!-- Xabarlar bildirishnomasi (Alerts) -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- IZOH QOLDIRISH FORMASI -->
+            {% if request.user.is_authenticated %}
+                <form method="post" action="{% url 'products:product_detail' product.slug %}" class="mb-4 bg-light p-3 rounded-3 border">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Baho berish (1-5)</label>
+                            {{ form.rating }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Izohingiz</label>
+                            {{ form.comment }}
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 btn-sm fw-bold">
+                                Izoh qoldirish
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            {% else %}
+                <div class="alert alert-warning text-center border mb-4">
+                    Izoh va baho qoldirish uchun <a href="{% url 'accounts:login' %}" class="fw-bold">tizimga kiring</a>.
+                </div>
+            {% endif %}
+
+            <!-- IZOHLAR RO'YXATI -->
+            <div class="reviews-list">
+                {% for review in reviews %}
+                    <div class="border-bottom py-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark">
+                                {% if review.user.get_full_name %}
+                                    {{ review.user.get_full_name }}
+                                {% else %}
+                                    {{ review.user.username }}
+                                {% endif %}
+                            </strong>
+                            <span class="text-warning fw-bold">⭐ {{ review.rating }}</span>
+                        </div>
+                        <p class="text-secondary mb-1" style="white-space: pre-line;">{{ review.comment }}</p>
+                        <small class="text-muted" style="font-size: 0.75rem;">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                {% empty %}
+                    <p class="text-muted text-center py-3 mb-0">Hali hech kim izoh qoldirmagan. Birinchi bo'lib siz izoh qoldiring!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- O'ng tomon: Sotuvchi ma'lumotlari va Chat -->
+    <div class="col-lg-4">
+        <div class="card card-custom p-4 text-center mb-4">
+            <h5 class="fw-bold mb-3">Sotuvchi</h5>
+            
+            {% if product.seller.profile.avatar %}
+                <img src="{{ product.seller.profile.avatar.url }}" class="rounded-circle mx-auto mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+            {% else %}
+                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-2 fw-bold" style="width: 80px; height: 80px; font-size: 24px;">
+                    {{ product.seller.username|slice:":1"|upper }}
+                </div>
+            {% endif %}
+
+            <h5 class="fw-bold mb-0">{{ product.seller.get_full_name|default:product.seller.username }}</h5>
+            <p class="text-muted small mb-3">@{{ product.seller.username }}</p>
+
+            <!-- E'londa ko'rsatilgan telefon raqami -->
+            {% if product.phone_number %}
+                <a href="tel:{{ product.phone_number }}" class="btn btn-success w-100 mb-2 fw-bold">📞 {{ product.phone_number }}</a>
+            {% elif product.seller.phone %}
+                <a href="tel:{{ product.seller.phone }}" class="btn btn-success w-100 mb-2 fw-bold">📞 {{ product.seller.phone }}</a>
+            {% endif %}
+
+            <!-- Sayt ichidagi Chat tugmasi -->
+            {% if user.is_authenticated and user != product.seller %}
+                <a href="{% url 'chat:start_dialog' product.id %}" class="btn btn-primary w-100 mb-2 fw-bold">💬 Chat orqali yozish</a>
+            {% endif %}
+
+            <!-- Telegram orqali yozish -->
+            {% if product.seller.telegram_username %}
+                <a href="https://t.me/{{ product.seller.telegram_username }}" target="_blank" class="btn btn-outline-primary w-100 mb-2">💬 Telegram orqali yozish</a>
+            {% endif %}
+
+            <a href="{% url 'accounts:seller_store' product.seller.username %}" class="btn btn-outline-dark btn-sm w-100 mt-2">Sotuvchining barcha e'lonlari</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

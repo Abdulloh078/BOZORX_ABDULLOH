@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Tizimga kirish | Marketplace{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card card-custom p-4">
+            <h3 class="fw-bold text-center mb-4">Tizimga kirish</h3>
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary-custom w-100 mt-3">Kirish</button>
+            </form>
+            <p class="text-center text-muted small mt-4 mb-0">
+                Akkountingiz yo'qmi? <a href="{% url 'accounts:register' %}" class="text-decoration-none fw-bold">Ro'yxatdan o'tish</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

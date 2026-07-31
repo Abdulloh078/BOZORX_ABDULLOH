@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Barcha E'lonlar va Mahsulotlar — Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Global Layout & Background */
+    body {
+        background-color: #f8fafc;
+    }
+
+    /* Card styling */
+    .product-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #ffffff;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        overflow: hidden;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08) !important;
+        border-color: #cbd5e1;
+    }
+
+    /* Rasmlar Sig'ishi va O'lchami (4:3 nisbat va Contain) */
+    .card-img-wrapper {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        background-color: #f1f5f9;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Rasmni chetlarini kesmasdan to'liq ko'rsatadi */
+        padding: 6px;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-card-img {
+        transform: scale(1.04);
+    }
+
+    /* Badge & Favorite Button */
+    .badge-condition {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(4px);
+        color: #ffffff;
+        font-weight: 500;
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 6px;
+        z-index: 2;
+    }
+
+    .favorite-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        z-index: 2;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .favorite-btn:hover {
+        color: #ef4444;
+        transform: scale(1.08);
+    }
+
+    .favorite-btn.active {
+        color: #ef4444;
+    }
+
+    /* Matnlar va Narx */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.6rem;
+        font-size: 0.93rem;
+        line-height: 1.3rem;
+        font-weight: 500;
+    }
+
+    .price-text {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .sidebar-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <div class="row g-4">
+        
+        <!-- CHAP TARAFI: KATEGORIYA VA FILTRLAR -->
+        <div class="col-lg-3">
+            <div class="card sidebar-card border-0 shadow-sm mb-3">
+                <div class="card-body p-3">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-3">Kategoriyalar</h6>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'products:product_list' %}" class="list-group-item list-group-item-action border-0 rounded-2 px-3 py-2 mb-1 {% if not category %}bg-primary text-white fw-medium{% else %}text-dark{% endif %}">
+                            <i class="bi bi-grid-fill me-2"></i> Barcha e'lonlar
+                        </a>
+                        {% for cat in categories %}
+                            <a href="{% url 'products:product_list_by_category' cat.slug %}" class="list-group-item list-group-item-action border-0 rounded-2 px-3 py-2 mb-1 {% if category.slug == cat.slug %}bg-primary text-white fw-medium{% else %}text-dark{% endif %}">
+                                {{ cat.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILTR PANELI -->
+            <div class="card sidebar-card border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="fw-bold text-uppercase text-muted small mb-3">Filtrlash</h6>
+                    <form method="get">
+                        {% if query %}
+                            <input type="hidden" name="q" value="{{ query }}">
+                        {% endif %}
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-semibold">Mahsulot holati</label>
+                            <select name="condition" class="form-select form-select-sm rounded-2">
+                                <option value="">Barcha holatlar</option>
+                                <option value="NEW" {% if selected_condition == 'NEW' %}selected{% endif %}>Yangi</option>
+                                <option value="USED" {% if selected_condition == 'USED' %}selected{% endif %}>Ishlatilgan</option>
+                                <option value="REFURBISHED" {% if selected_condition == 'REFURBISHED' %}selected{% endif %}>Tiklangani (Refurbished)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100 rounded-2 fw-medium py-2">
+                            <i class="bi bi-funnel-fill me-1"></i> Saralash
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- O'NG TARAFI: MAHSULOTLAR RO'YXATI -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold text-dark m-0">
+                        {% if category %}{{ category.name }}{% else %}Barcha E'lonlar{% endif %}
+                    </h5>
+                    <small class="text-muted">{{ products|length }} ta e'lon topildi</small>
+                </div>
+                <a href="{% url 'products:product_create' %}" class="btn btn-primary rounded-pill px-4 btn-sm fw-medium shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> E'lon berish
+                </a>
+            </div>
+
+            <!-- KORTOCHKALAR GRIDI -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                {% for product in products %}
+                    <div class="col">
+                        <div class="card h-100 product-card">
+                            
+                            <!-- RASM VA BADGELAR -->
+                            <div class="card-img-wrapper">
+                                <span class="badge-condition">
+                                    {{ product.get_condition_display|default:product.condition }}
+                                </span>
+
+                                <!-- YURAKCHA (FAVORITE) TUGMASI -->
+                                <button class="favorite-btn {% if user_favorites and product.id in user_favorites %}active{% endif %}" 
+                                        type="button" 
+                                        data-slug="{{ product.slug }}" 
+                                        title="Saralanganlarga qo'shish">
+                                    <i class="bi {% if user_favorites and product.id in user_favorites %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+                                </button>
+
+                                <a href="{% url 'products:product_detail' product.slug %}" class="w-100 h-100 d-block">
+                                    {% if product.images.first %}
+                                        <img src="{{ product.images.first.image.url }}" class="product-card-img" alt="{{ product.title }}">
+                                    {% else %}
+                                        <div class="h-100 d-flex align-items-center justify-content-center text-muted">
+                                            <i class="bi bi-image fs-1 opacity-25"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
+                            </div>
+
+                            <!-- CARD MAZMUNI -->
+                            <div class="card-body p-3 d-flex flex-column">
+                                
+                                <h6 class="fw-semibold text-dark line-clamp-2 mb-2">
+                                    <a href="{% url 'products:product_detail' product.slug %}" class="text-decoration-none text-dark">
+                                        {{ product.title }}
+                                    </a>
+                                </h6>
+
+                                <div class="mt-auto pt-2 border-top border-light">
+                                    <div class="price-text">
+                                        {{ product.price|floatformat:0|intcomma }} <small class="fs-6 fw-normal text-muted">so'm</small>
+                                    </div>
+                                    <div class="small text-muted d-flex align-items-center mt-1">
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                        <span>{{ product.region|default:"O'zbekiston" }}{% if product.city %}, {{ product.city }}{% endif %}</span>
+                                    </div>
+
+                                    <!-- E'LON EGASI UCHUN TAHRIRLASH VA O'CHIRISH TUGMALARI -->
+                                    {% if request.user == product.seller %}
+                                        <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                                            <a href="{% url 'products:product_update' product.slug %}" class="btn btn-outline-primary btn-sm rounded-2 w-50 fw-medium">
+                                                <i class="bi bi-pencil"></i> Tahrirlash
+                                            </a>
+                                            <a href="{% url 'products:product_delete' product.slug %}" class="btn btn-outline-danger btn-sm rounded-2 w-50 fw-medium">
+                                                <i class="bi bi-trash"></i> O'chirish
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <div class="p-5 bg-white rounded-4 shadow-sm border">
+                            <i class="bi bi-inbox fs-1 text-primary d-block mb-3"></i>
+                            <h5 class="fw-bold text-dark">E'lonlar topilmadi</h5>
+                            <p class="text-muted small">Tanlangan mezonlar bo'yicha hech qanday e'lon yo'q.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}" === "true";
+    const loginUrl = "{% url 'accounts:login' %}";
+
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            if (!isAuthenticated) {
+                window.location.href = loginUrl;
+                return;
+            }
+
+            const slug = this.dataset.slug;
+            const icon = this.querySelector('i');
+            const btn = this;
+
+            fetch(`/products/${slug}/favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Xatolik yuz berdi');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.is_favorite) {
+                    btn.classList.add('active');
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill', 'text-danger');
+                } else {
+                    btn.classList.remove('active');
+                    icon.classList.remove('bi-heart-fill', 'text-danger');
+                    icon.classList.add('bi-heart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

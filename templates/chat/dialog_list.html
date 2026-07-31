@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Mening xabarlarim{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8">
+        <h3 class="fw-bold mb-4">Suhbatlar ro'yxati</h3>
+        <div class="list-group shadow-sm">
+            {% for d in dialogs %}
+                <a href="{% url 'chat:dialog_detail' d.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <h6 class="fw-bold mb-1">{{ d.product.title }}</h6>
+                        <small class="text-muted">
+                            {% if request.user == d.sender %}Sotuvchi: {{ d.recipient.username }}{% else %}Xaridor: {{ d.sender.username }}{% endif %}
+                        </small>
+                    </div>
+                    <span class="btn btn-sm btn-outline-primary">Ochish &raquo;</span>
+                </a>
+            {% empty %}
+                <div class="p-4 text-center text-muted">Hozircha xabarlar yo'q.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
