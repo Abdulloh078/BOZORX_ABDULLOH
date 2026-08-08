@@ -1,13 +1,14 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 # BASE_DIR - Loyihaning ildiz papkasi
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security Settings
-SECRET_KEY = 'django-insecure-marketplace-production-ready-key-change-this!'
-DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-marketplace-production-ready-key-change-this!')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['*']
 
 
 # Installed Applications
@@ -19,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',  # <<< SHU QATORNI QO'SHING
+    'django.contrib.humanize',
 
     # Third Party Apps
     'crispy_forms',
@@ -38,8 +39,9 @@ INSTALLED_APPS = [
 
 # Middleware Configuration
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Mobil ilova CORS uchun ENG TEPADA bo'lishi shart
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Statik fayllar (CSS/JS) uchun WhiteNoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -73,12 +75,12 @@ TEMPLATES = [
 ]
 
 
-# Database
+# Database (Render PostgreSQL ulanishi)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
+    )
 }
 
 
@@ -102,6 +104,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise orqali statik fayllarni siqish va keshlashtirish
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -139,6 +144,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
 }
-LOGIN_URL = 'accounts:login'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
