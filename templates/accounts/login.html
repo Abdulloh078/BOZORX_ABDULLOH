@@ -1,127 +1,183 @@
 <!DOCTYPE html>
-<html lang="uz" data-bs-theme="light">
+<html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tizimga kirish — Marketplace</title>
+    <title>Tizimga kirish — Bozorix</title>
+    <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        .auth-bg {
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b, #0f172a, #020617);
             min-height: 100vh;
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px 0;
         }
-        [data-bs-theme="dark"] .auth-bg {
-            background: linear-gradient(135deg, #1e1b4b 0%, #3b0764 50%, #831843 100%);
-        }
-        .auth-card {
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+
+        .auth-wrapper {
             width: 100%;
             max-width: 420px;
+            padding: 15px;
         }
-        [data-bs-theme="dark"] .auth-card {
-            background: #1e293b;
-            color: #ffffff;
+
+        .auth-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 40px 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
         }
-        .theme-toggle-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            border-radius: 50%;
-            width: 42px;
-            height: 42px;
-            display: flex;
+
+        .brand-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 8px 18px;
+            border-radius: 14px;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+        }
+
+        .custom-input {
+            background-color: rgba(30, 41, 59, 0.8) !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border-radius: 0 12px 12px 0 !important;
+            padding: 12px 16px !important;
+        }
+
+        .custom-input::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        .custom-input:focus {
+            background-color: rgba(15, 23, 42, 0.95) !important;
+            border-color: #8b5cf6 !important;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4) !important;
+            color: #ffffff !important;
+        }
+
+        .input-group-text {
+            background-color: rgba(30, 41, 59, 0.8) !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+            border-right: none !important;
+            color: #94a3b8 !important;
+            border-radius: 12px 0 0 12px !important;
+        }
+
+        .input-group:focus-within .input-group-text {
+            border-color: #8b5cf6 !important;
+            color: #38bdf8 !important;
+            background-color: rgba(15, 23, 42, 0.95) !important;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             border: none;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #ffffff !important;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
 
-    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Rejimni o'zgartirish">
-        <i id="theme-icon" class="bi bi-moon-stars-fill text-dark"></i>
-    </button>
-
-    <div class="auth-bg p-3">
-        <div class="auth-card p-4 p-sm-5 text-center">
+    <div class="auth-wrapper">
+        <div class="auth-card text-center">
             
-            <h3 class="fw-bold text-primary mb-1">MARKETPLACE</h3>
-            <p class="text-muted small mb-4">Onlayn e'lonlar va savdo platformasi</p>
+            <!-- LOGO QISMI -->
+            <div class="mb-4">
+                <span class="brand-badge">
+                    <i class="bi bi-bag-handle-fill"></i> BOZORIX
+                </span>
+            </div>
 
-            <h5 class="fw-bold mb-4">Tizimga kirish</h5>
+            <h4 class="fw-bold text-white mb-1">Xush kelibsiz!</h4>
+            <p class="text-secondary small mb-4">Hisobingizga kirish uchun login va parolni kiriting</p>
 
+            <!-- MESSAGES (XABARLAR) -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show small py-2" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button>
+                    <div class="alert alert-{{ message.tags|default:'info' }} bg-dark text-info border-info alert-dismissible fade show small py-2 text-start mb-3 border border-opacity-25 rounded-3 shadow-sm" role="alert">
+                        <i class="bi bi-info-circle-fill me-1"></i> {{ message }}
+                        <button type="button" class="btn-close btn-close-white py-2" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
             {% endif %}
 
+            <!-- FORM SHAKLI -->
             <form method="post" action="">
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
-                    <div class="alert alert-danger small py-2">
+                    <div class="alert alert-danger bg-danger bg-opacity-20 text-danger border border-danger border-opacity-25 small py-2 text-start mb-3 rounded-3">
                         {% for error in form.non_field_errors %}
-                            <div>{{ error }}</div>
+                            <div><i class="bi bi-exclamation-triangle-fill me-1"></i> {{ error }}</div>
                         {% endfor %}
                     </div>
                 {% endif %}
 
+                <!-- USERNAME -->
                 <div class="mb-3 text-start">
-                    <label class="form-label small fw-medium">Username / Login</label>
-                    <input type="text" name="username" class="form-control form-control-lg rounded-3 fs-6 bg-body-tertiary" placeholder="Username kiriting" required>
+                    <label class="form-label small fw-semibold text-secondary">Username / Login</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" name="username" class="form-control custom-input" placeholder="Username kiriting" required>
+                    </div>
                 </div>
 
+                <!-- PAROL -->
                 <div class="mb-4 text-start">
-                    <label class="form-label small fw-medium">Parol</label>
-                    <input type="password" name="password" class="form-control form-control-lg rounded-3 fs-6 bg-body-tertiary" placeholder="••••••••" required>
+                    <label class="form-label small fw-semibold text-secondary">Parol</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" class="form-control custom-input" placeholder="••••••••" required>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-bold mb-3 shadow-sm">
-                    Kirish
+                <!-- TUGMA -->
+                <button type="submit" class="btn btn-submit w-100 mb-3">
+                    Kirish <i class="bi bi-arrow-right-short fs-5 align-middle"></i>
                 </button>
             </form>
 
-            <div class="pt-3 border-top small">
-                <span class="text-muted">Hali hisobingiz yo'qmi?</span>
-                <a href="{% url 'accounts:register' %}" class="fw-bold text-primary text-decoration-none ms-1">Ro'yxatdan o'tish</a>
+            <!-- PASTKI REGISTRATSIYA SILKASI -->
+            <div class="pt-3 border-top border-secondary border-opacity-25 small text-center">
+                <span class="text-secondary">Hali hisobingiz yo'qmi?</span>
+                <a href="{% url 'accounts:register' %}" class="fw-bold text-info text-decoration-none ms-1">Ro'yxatdan o'tish</a>
             </div>
 
         </div>
     </div>
 
-    <script>
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-bs-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        }
-
-        function updateThemeIcon(theme) {
-            const icon = document.getElementById('theme-icon');
-            if (icon) {
-                icon.className = theme === 'dark' ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-dark';
-            }
-        }
-
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-bs-theme', savedTheme);
-        document.addEventListener('DOMContentLoaded', () => updateThemeIcon(savedTheme));
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

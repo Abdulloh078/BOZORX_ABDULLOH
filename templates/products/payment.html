@@ -1,132 +1,30 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}E'lonni faollashtirish uchun to'lov{% endblock %}
+{% block title %}E'lonni tasdiqlash — Bozorix{% endblock %}
 
 {% block content %}
-<style>
-    /* Asosiy Karta (Card) dizayni */
-    .payment-card {
-        background: #ffffff;
-        border-radius: 24px !important;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .payment-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
-    }
-
-    /* To'lov kodi va ma'lumotlar bloki */
-    .info-alert {
-        background-color: #f0f4ff;
-        border: 1px solid #d0dffe;
-        border-radius: 18px;
-        color: #1e293b;
-    }
-
-    .payment-code-box {
-        background: #ffffff;
-        padding: 10px 20px;
-        border-radius: 14px;
-        border: 2px dashed #ef4444;
-        display: inline-block;
-    }
-
-    /* Plastik karta ko'rinishidagi blok */
-    .card-number-box {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        color: #ffffff !important;
-        border-radius: 18px !important;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .card-number-box::after {
-        content: '';
-        position: absolute;
-        top: -40%;
-        right: -30%;
-        width: 120px;
-        height: 120px;
-        background: rgba(255, 255, 255, 0.06);
-        border-radius: 50%;
-    }
-
-    /* Telegram / Action Tugmasi */
-    .btn-custom-action {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        border: none;
-        color: #ffffff;
-        font-weight: 600;
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
-        transition: all 0.3s ease;
-    }
-
-    .btn-custom-action:hover {
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.45);
-        transform: translateY(-2px);
-        color: #ffffff;
-    }
-
-    /* Bekor qilish havolasi */
-    .btn-cancel {
-        color: #64748b !important;
-        transition: color 0.2s ease;
-    }
-
-    .btn-cancel:hover {
-        color: #0f172a !important;
-    }
-</style>
-
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card payment-card border-0 p-4 text-center">
-                <h4 class="fw-bold mb-2 text-dark">E'lonni faollashtirish</h4>
-                <p class="text-muted small mb-4">E'loningiz saytda ko'rinishi uchun to'lovni amalga oshiring.</p>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-3">
+                        <span class="fs-1">📦</span>
+                    </div>
+                    <h3 class="fw-bold mb-2">E'loningiz qabul qilindi!</h3>
+                    <p class="text-muted">E'lon platformaga muvaffaqiyatli joylandi va moderator ko'rigidan o'tgach faollashadi.</p>
 
-                <!-- MAHSULOT VA TO'LOV KODI -->
-                <div class="info-alert p-3 mb-4 text-start">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">E'lon nomi:</span>
-                        <strong class="text-dark">{{ product.title }}</strong>
+                    <hr class="my-4">
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg rounded-3 fw-bold">
+                            🏠 Bosh sahifaga qaytish
+                        </a>
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary rounded-3">
+                            👤 Mening e'lonlarim
+                        </a>
                     </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">To'lov summasi:</span>
-                        <strong class="text-success fs-5">{{ product.publication_fee|default:"9 000" }} so'm</strong>
-                    </div>
-                    
-                    <div class="text-center my-2">
-                        <div class="payment-code-box">
-                            <span class="text-secondary d-block fs-7">🔑 To'lov kodi (ID):</span>
-                            <span class="fs-4 fw-bold text-danger">#{{ product.id }}</span>
-                        </div>
-                    </div>
-                    
-                    <small class="text-muted d-block text-center mt-2" style="font-size: 0.78rem;">
-                        * To'lov qilayotganda ushbu kodni izohda ko'rsatishni unutmang!
-                    </small>
                 </div>
-
-                <!-- KARTA RAQAMI BLOKI -->
-                <div class="card-number-box p-3 mb-4 text-start">
-                    <small class="text-white-50 d-block mb-1 fs-7">To'lov uchun karta raqami:</small>
-                    <h4 class="fw-bold text-white mb-1 tracking-wide">9860 0825 8976 8884</h4>
-                    <small class="text-white-50">Xoshimov Risolathon</small>
-                </div>
-
-                <!-- YANGI BOT LINKI -->
-                <a href="https://t.me/chekuzxizbot?start={{ product.id }}" target="_blank" class="btn btn-custom-action rounded-pill py-3 w-100 mb-3">
-                    <i class="bi bi-telegram me-2 fs-5 align-middle"></i> Chekni Botga Yuborish
-                </a>
-
-                <a href="{% url 'products:product_list' %}" class="btn btn-link btn-cancel text-decoration-none small">
-                    Keyinroq to'lash va orqaga qaytish
-                </a>
             </div>
         </div>
     </div>

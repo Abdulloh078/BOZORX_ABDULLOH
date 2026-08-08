@@ -6,38 +6,55 @@ from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from .models import Product, Category, ProductImage, Review, Favorite
 from .forms import ProductForm, ReviewForm
-from django.utils import timezone
-from datetime import timedelta
+
+
+def get_all_subcategory_ids(category):
+    """
+    Kategoriya va uning BARCHA ichki ost-kategoriyalari (children/subcategories) ID larini yig'ib beradi.
+    """
+    category_ids = [category.id]
+    children = category.children.all()
+    for child in children:
+        category_ids.extend(get_all_subcategory_ids(child))
+    return category_ids
 
 
 def product_list_view(request, category_slug=None):
     """
-    Barcha e'lonlar va kategoriyalar bo'yicha saralash sahifasi
+    Barcha e'lonlar, kategoriyalar, qidiruv va foydalanuvchi e'lonlarini ko'rsatuvchi view
     """
     category = None
     categories = Category.objects.filter(parent=None)
     products = Product.objects.filter(status=Product.Status.ACTIVE).select_related('category', 'seller').prefetch_related('images')
 
-    # Kategoriya bo'yicha filter
+    # 1. "Mening E'lonlarim" filtri (?my_products=1)
+    my_products = request.GET.get('my_products')
+    if my_products == '1':
+        if request.user.is_authenticated:
+            products = products.filter(seller=request.user)
+        else:
+            messages.info(request, "O'zingizning e'lonlaringizni ko'rish uchun tizimga kiring!")
+            return redirect('accounts:login')
+
+    # 2. Kategoriya va uning BARCHA ost-kategoriyalari bo'yicha filter
     if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
-        sub_categories = category.children.all()
-        categories_to_filter = [category] + list(sub_categories)
-        products = products.filter(category__in=categories_to_filter)
+        all_cat_ids = get_all_subcategory_ids(category)
+        products = products.filter(category_id__in=all_cat_ids)
 
-    # Qidiruv
+    # 3. Qidiruv paneli filtri (?q=query)
     query = request.GET.get('q')
     if query:
         products = products.filter(
             Q(title__icontains=query) | Q(description__icontains=query)
         )
 
-    # Holati bo'yicha filter (NEW, USED, REFURBISHED)
+    # 4. Holati bo'yicha filter (NEW, USED, REFURBISHED)
     condition = request.GET.get('condition')
     if condition:
         products = products.filter(condition=condition)
 
-    # Tizimga kirgan foydalanuvchining yoqtirgan mahsulotlari ID larini olish
+    # Foydalanuvchining saralangan (yoqtirgan) e'lonlari ID lari
     user_favorites = []
     if request.user.is_authenticated:
         user_favorites = Favorite.objects.filter(user=request.user).values_list('product_id', flat=True)
@@ -49,14 +66,14 @@ def product_list_view(request, category_slug=None):
         'selected_condition': condition,
         'query': query,
         'user_favorites': user_favorites,
+        'is_my_products': my_products == '1',
     }
     return render(request, 'products/product_list.html', context)
 
 
 def product_detail_view(request, slug):
     """
-    Mahsulotning batafsil sahifasi: 
-    Ko'rishlar soni, izohlar, baholash va o'xshash mahsulotlarni ko'rsatadi
+    Mahsulotning batafsil sahifasi
     """
     product = get_object_or_404(Product, slug=slug)
 
@@ -87,7 +104,7 @@ def product_detail_view(request, slug):
     reviews = product.reviews.select_related('user').all().order_by('-created_at')
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
 
-    # O'xshash mahsulotlar (xuddi shu kategoriyadagi 4 ta mahsulot)
+    # O'xshash mahsulotlar
     related_products = Product.objects.filter(
         category=product.category, 
         status=Product.Status.ACTIVE
@@ -125,6 +142,9 @@ def toggle_favorite_view(request, slug):
 
 @login_required
 def product_create_view(request):
+    """
+    Yangi e'lon qo'shish
+    """
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         images = request.FILES.getlist('images')
@@ -133,40 +153,63 @@ def product_create_view(request):
             product = form.save(commit=False)
             product.seller = request.user
             
-            # 1 oylik tekin yoki pullik shartni tekshirish (masalan, foydalanuvchining ilk e'loni tekin)
-            user_products_count = Product.objects.filter(seller=request.user).count()
-            if user_products_count == 0:
-                # 1-oy tekin
-                product.is_paid = True
-                product.is_approved = True
-                product.status = 'ACTIVE'
-                product.save()
-                messages.success(request, "Tabriklaymiz! 1 oylik tekin e'loningiz muvaffaqiyatli joylandi.")
-                return redirect('products:product_detail', slug=product.slug)
-            else:
-                # Pullik e'lon (9000 so'm va to'lov sahifasiga o'tadi)
-                product.is_paid = False
-                product.is_approved = False
-                product.status = 'INACTIVE'
-                product.save()
+            # Dinamik maydonlarni xaritalash
+            data = form.cleaned_data
+            fields_map = [
+                ('auto_year', '📅 Chiqarilgan yili'),
+                ('auto_mileage', '🛣️ Yurgan masofasi', lambda v: f"{v:,} km"),
+                ('auto_fuel', '⛽ Yoqilg\'i turi', lambda v: dict(form.fields['auto_fuel'].choices).get(v, v)),
+                ('auto_transmission', '⚙️ Korobka', lambda v: dict(form.fields['auto_transmission'].choices).get(v, v)),
+                ('tech_brand', '🏷️ Brend/Marka'),
+                ('tech_memory', '💾 Xotira'),
+                ('tech_color', '🎨 Rangi'),
+                ('home_rooms', '🚪 Xonalar soni'),
+                ('home_area', '📐 Maydoni'),
+                ('home_floor', '🏢 Qavat'),
+                ('food_weight', '⚖️ Og\'irligi/Hajmi'),
+                ('food_expiry', '⏳ Yaroqlilik muddati'),
+                ('clothing_size', '📏 O\'lchami (Razmer)'),
+                ('clothing_gender', '👤 Kim uchun', lambda v: dict(form.fields['clothing_gender'].choices).get(v, v)),
+                ('furniture_material', '🪵 Materiali'),
+                ('service_type', '🛠️ Xizmat turi'),
+                ('pet_age', '🐾 Yoshi/Zoti'),
+                ('job_salary', '💵 Oylik maosh'),
+                ('job_type', '⏰ Ish grafigi', lambda v: dict(form.fields['job_type'].choices).get(v, v)),
+                ('sport_category', '⚽ Sport turi'),
+            ]
+
+            extra_info = ""
+            for item in fields_map:
+                field_name = item[0]
+                label = item[1]
+                formatter = item[2] if len(item) > 2 else None
                 
-                for index, image in enumerate(images):
-                    ProductImage.objects.create(product=product, image=image, is_main=(index == 0))
-                
-                return redirect('products:payment_page', product_id=product.id)
+                val = data.get(field_name)
+                if val is not None and val != '':
+                    formatted_val = formatter(val) if formatter else str(val)
+                    extra_info += f"\n{label}: {formatted_val}"
+
+            if extra_info:
+                product.description = (product.description or '') + "\n\n📋 --- Xarakteristikalar ---" + extra_info
+
+            product.status = Product.Status.ACTIVE
+            product.save()
+
+            for index, image in enumerate(images):
+                ProductImage.objects.create(
+                    product=product, 
+                    image=image, 
+                    is_main=(index == 0)
+                )
+
+            messages.success(request, "E'loningiz muvaffaqiyatli joylandi!")
+            return redirect('products:product_detail', slug=product.slug)
+        else:
+            messages.error(request, "Iltimos, shakldagi xatoliklarni to'g'rilang.")
     else:
         form = ProductForm()
 
     return render(request, 'products/product_create.html', {'form': form})
-
-
-@login_required
-def payment_page_view(request, product_id):
-    """
-    E'lon uchun to'lov sahifasi
-    """
-    product = get_object_or_404(Product, id=product_id, seller=request.user)
-    return render(request, 'products/payment.html', {'product': product})
 
 
 @login_required
@@ -223,3 +266,67 @@ def product_delete_view(request, slug):
         return redirect('products:product_list')
 
     return render(request, 'products/product_confirm_delete.html', {'product': product})
+
+
+# ==========================================
+# SAVAT (CART) BO'LIMI FUNKSIYALARI
+# ==========================================
+
+def cart_detail_view(request):
+    """
+    Savatdagi mahsulotlarni va sotuvchi ma'lumotlarini ko'rsatish
+    """
+    cart = request.session.get('cart', {})
+    product_ids = [int(pid) for pid in cart.keys() if str(pid).isdigit()]
+    
+    # Sotuvchi ma'lumotlarini shablonda xatolarsiz ko'rsatish uchun select_related('seller') qo'shildi
+    products_db = Product.objects.filter(id__in=product_ids).select_related('seller').prefetch_related('images')
+    
+    cart_items = []
+    total_sum = 0
+
+    for product in products_db:
+        quantity = cart.get(str(product.id), 0)
+        total_price = product.price * quantity
+        total_sum += total_price
+        cart_items.append({
+            'product': product,
+            'quantity': quantity,
+            'total_price': total_price,
+        })
+
+    context = {
+        'cart_items': cart_items,
+        'total_sum': total_sum,
+    }
+    return render(request, 'products/cart_detail.html', context)
+
+
+def cart_add_view(request, product_id):
+    """
+    Savatga mahsulot qo'shish
+    """
+    cart = request.session.get('cart', {})
+    str_id = str(product_id)
+    
+    cart[str_id] = cart.get(str_id, 0) + 1
+    
+    request.session['cart'] = cart
+    request.session.modified = True
+    
+    return redirect(request.META.get('HTTP_REFERER', 'products:cart_detail'))
+
+
+def cart_remove_view(request, product_id):
+    """
+    Savatdan mahsulotni o'chirish
+    """
+    cart = request.session.get('cart', {})
+    str_id = str(product_id)
+    
+    if str_id in cart:
+        del cart[str_id]
+        request.session['cart'] = cart
+        request.session.modified = True
+        
+    return redirect('products:cart_detail')

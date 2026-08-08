@@ -1,26 +1,83 @@
-{% if request.user.is_authenticated %}
-    <div class="dropdown">
-        <button class="btn btn-light border rounded-pill dropdown-toggle d-flex align-items-center gap-2 px-3 py-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-person-circle fs-5 text-primary"></i>
-            <span class="fw-semibold text-dark">{{ request.user.username }}</span>
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top shadow-sm">
+    <div class="container">
+        <!-- LOGO -->
+        <a class="navbar-brand fw-bold text-primary fs-4" href="{% url 'products:product_list' %}">
+            🛍️ Bozorix
+        </a>
+
+        <!-- MOBIL MENYU TUGMASI -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2">
-            <li>
-                <a class="dropdown-item py-2" href="{% url 'accounts:profile' %}">
-                    <i class="bi bi-person me-2 text-primary"></i> Shaxsiy Kabinet
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item py-2" href="{% url 'accounts:profile_edit' %}">
-                    <i class="bi bi-gear me-2 text-secondary"></i> Sozlamalar
-                </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <a class="dropdown-item py-2 text-danger" href="{% url 'accounts:logout' %}">
-                    <i class="bi bi-box-arrow-right me-2"></i> Chiqish
-                </a>
-            </li>
-        </ul>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            
+            <!-- QIDIRUV -->
+            <form class="d-flex mx-auto my-2 my-lg-0 w-50" action="{% url 'products:product_list' %}" method="get">
+                <input class="form-control me-2" type="search" name="q" placeholder="Qidirish (masalan: iPhone 13, Spark...)" value="{{ query|default:'' }}">
+                <button class="btn btn-primary" type="submit">Qidirish</button>
+            </form>
+
+            <!-- TUGMALAR VA PROFIL -->
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                
+                <li class="nav-item">
+                    <a class="btn btn-primary fw-bold px-3" href="{% url 'products:product_create' %}">
+                        <i class="bi bi-plus-circle me-1"></i> E'lon berish
+                    </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle fw-bold text-dark d-flex align-items-center border rounded-pill px-3 py-1" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <span class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center me-2" style="width: 28px; height: 28px; font-size: 14px;">
+                            {{ user.username|slice:":1"|upper }}
+                        </span>
+                        {{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <li>
+                            <a class="dropdown-item py-2" href="{% url 'products:product_list' %}?my_products=1">
+                                📦 Mening E'lonlarim
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger py-2 w-100 text-start border-0 bg-transparent">
+                                    🚪 Chiqish
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="btn btn-outline-primary fw-bold px-3" href="{% url 'accounts:login' %}">Kirish</a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </div>
     </div>
-{% endif %}
+</nav>
+
+<!-- KATEGORIYALAR GORIZONTAL CHIZIG'I -->
+<div class="bg-light border-bottom py-2 overflow-auto">
+    <div class="container d-flex gap-2 align-items-center text-nowrap">
+        
+        <a href="{% url 'products:product_list' %}" class="btn btn-sm {% if not category and not is_my_products %}btn-primary{% else %}btn-outline-primary{% endif %} fw-bold">
+            ✨ Barcha E'lonlar
+        </a>
+        
+        <!-- Har bir kategoriya o'zining get_absolute_url funksiyasi orqali havola oladi -->
+        {% for cat in categories %}
+            <a href="{{ cat.get_absolute_url }}" 
+               class="btn btn-sm {% if category.slug == cat.slug %}btn-secondary{% else %}btn-white border{% endif %} text-dark fw-semibold">
+                {{ cat.name }}
+            </a>
+        {% endfor %}
+
+    </div>
+</div>

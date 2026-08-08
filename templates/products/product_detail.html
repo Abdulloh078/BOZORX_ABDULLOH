@@ -1,111 +1,251 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
-{% block title %}{{ product.title }} | Marketplace{% endblock %}
+{% block title %}{{ product.title }} | Bozorix{% endblock %}
 
 {% block content %}
+<style>
+    .glass-card {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        padding: 24px;
+        color: #ffffff;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .carousel-inner {
+        background: rgba(2, 6, 23, 0.5) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+    }
+
+    /* Input, Select va Textarea elementlarini to'q neon temaga moslash */
+    .glass-card .form-control,
+    .glass-card .form-select,
+    .glass-card .form-control-dark,
+    .glass-card .form-select-dark {
+        background-color: rgba(30, 41, 59, 0.9) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        color: #ffffff !important;
+        border-radius: 12px !important;
+    }
+
+    .glass-card .form-control::placeholder,
+    .glass-card textarea::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    .glass-card .form-control:focus,
+    .glass-card .form-select:focus,
+    .glass-card .form-control-dark:focus,
+    .glass-card .form-select-dark:focus {
+        background-color: rgba(15, 23, 42, 0.95) !important;
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .glass-card select option {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+    }
+
+    .seller-avatar-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ffffff;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-action-green {
+        background: #10b981;
+        color: white !important;
+        border-radius: 12px;
+        font-weight: 600;
+        border: none;
+    }
+
+    .btn-action-green:hover {
+        background: #059669;
+    }
+
+    .btn-action-purple {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white !important;
+        border-radius: 12px;
+        font-weight: 600;
+        border: none;
+    }
+
+    .btn-action-purple:hover {
+        opacity: 0.9;
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+    }
+
+    .btn-action-outline {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white !important;
+        border-radius: 12px;
+        font-weight: 600;
+        background: transparent;
+    }
+
+    .btn-action-outline:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .review-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 14px 0;
+    }
+
+    .review-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
 <div class="row g-4 py-3">
     <!-- Chap tomon: Rasmlar, Tavsif va Izohlar -->
     <div class="col-lg-8">
-        <!-- MAHSULOT MA'LUMOTLARI -->
-        <div class="card card-custom p-3 mb-4">
-            <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
-                <div class="carousel-inner rounded">
+        <!-- MAHSULOT MA'LUMOTLARI VA RASMLARI -->
+        <div class="glass-card mb-4">
+            <div id="productCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div class="carousel-inner">
                     {% for img in product.images.all %}
                         <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                            <img src="{{ img.image.url }}" class="d-block w-100" style="max-height: 450px; object-fit: contain; background: #f8f9fa;">
+                            <div class="d-flex align-items-center justify-content-center" style="height: 400px; width: 100%;">
+                                <img src="{{ img.image.url }}" class="d-block img-fluid rounded-3" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="{{ product.title }}">
+                            </div>
                         </div>
                     {% empty %}
                         <div class="carousel-item active">
-                            <div class="bg-secondary text-white text-center py-5">Rasm mavjud emas</div>
+                            <div class="text-secondary text-center py-5 d-flex flex-column align-items-center justify-content-center" style="height: 350px;">
+                                <i class="bi bi-image fs-1 opacity-25 mb-2"></i>
+                                <span>Rasm mavjud emas</span>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
+
+                <!-- KARUSEL TUGMALARI -->
                 {% if product.images.count > 1 %}
                     <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                        <span class="carousel-control-prev-icon bg-dark bg-opacity-75 rounded-circle p-2" aria-hidden="true"></span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                        <span class="carousel-control-next-icon bg-dark bg-opacity-75 rounded-circle p-2" aria-hidden="true"></span>
                     </button>
                 {% endif %}
             </div>
 
-            <h3 class="fw-bold">{{ product.title }}</h3>
-            <h4 class="text-primary fw-bold mb-3">{{ product.price }} so'm {% if product.is_negotiable %}<span class="fs-6 text-muted">(Kelishtiriladi)</span>{% endif %}</h4>
-            <p class="text-muted small">📍 {{ product.region }}, {{ product.city }} • {{ product.created_at|date:"d-E, Y" }} • 👁️ {{ product.views_count }} marta ko'rildi</p>
-            <hr>
-            <h5 class="fw-bold mb-3">Tavsif</h5>
-            <p style="white-space: pre-line;">{{ product.description }}</p>
+            <h3 class="fw-bold text-white mb-2">{{ product.title }}</h3>
+            <h4 class="text-info fw-bold mb-3">
+                {{ product.price|floatformat:0|intcomma }} so'm 
+                {% if product.is_negotiable %}
+                    <span class="fs-6 text-secondary fw-normal">(Kelishtiriladi)</span>
+                {% endif %}
+            </h4>
+            <p class="text-secondary small mb-3">
+                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ product.region|default:"O'zbekiston" }}{% if product.city %}, {{ product.city }}{% endif %} 
+                • <i class="bi bi-calendar3 me-1"></i>{{ product.created_at|date:"d-F, Y" }} 
+                • <i class="bi bi-eye me-1"></i>{{ product.views_count|default:0 }} marta ko'rildi
+            </p>
+            <hr class="border-secondary opacity-25">
+            <h5 class="fw-bold mb-3 text-white">Tavsif</h5>
+            <p class="text-slate-300" style="white-space: pre-line; line-height: 1.6;">{{ product.description|default:"Tavsif kiritilmagan." }}</p>
         </div>
 
         <!-- IZOHLAR VA BAHOLASH BO'LIMI -->
-        <div class="card card-custom p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                <h5 class="fw-bold mb-0">Izohlar va Baholar ({{ reviews.count }})</h5>
+        <div class="glass-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary opacity-75">
+                <h5 class="fw-bold mb-0 text-white">Izohlar va Baholar ({{ reviews.count|default:0 }})</h5>
                 <span class="text-warning fw-bold fs-5">
                     {% if avg_rating > 0 %}
-                        ⭐ {{ avg_rating }} / 5
+                        ⭐ {{ avg_rating|floatformat:1 }} / 5
                     {% else %}
                         Hali baholanmagan
                     {% endif %}
                 </span>
             </div>
 
-            <!-- Xabarlar bildirishnomasi (Alerts) -->
+            <!-- XABARLAR (ALERTS) -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div class="alert alert-{{ message.tags|default:'info' }} bg-dark border-info text-info alert-dismissible fade show rounded-3" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
             {% endif %}
 
             <!-- IZOH QOLDIRISH FORMASI -->
             {% if request.user.is_authenticated %}
-                <form method="post" action="{% url 'products:product_detail' product.slug %}" class="mb-4 bg-light p-3 rounded-3 border">
+                <form method="post" action="{% url 'products:product_detail' product.slug %}" class="mb-4 p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
                     {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">Baho berish (1-5)</label>
-                            {{ form.rating }}
+                            <label class="form-label small fw-bold text-secondary">Baho berish (1-5)</label>
+                            {% if form.rating %}
+                                {{ form.rating }}
+                            {% else %}
+                                <select name="rating" class="form-select form-select-sm">
+                                    <option value="5">5 ⭐⭐⭐⭐⭐</option>
+                                    <option value="4">4 ⭐⭐⭐⭐</option>
+                                    <option value="3">3 ⭐⭐⭐</option>
+                                    <option value="2">2 ⭐⭐</option>
+                                    <option value="1">1 ⭐</option>
+                                </select>
+                            {% endif %}
                         </div>
                         <div class="col-12">
-                            <label class="form-label small fw-bold">Izohingiz</label>
-                            {{ form.comment }}
+                            <label class="form-label small fw-bold text-secondary">Izohingiz</label>
+                            {% if form.text %}
+                                {{ form.text }}
+                            {% elif form.comment %}
+                                {{ form.comment }}
+                            {% else %}
+                                <textarea name="text" class="form-control" rows="3" placeholder="Mahsulot yoki sotuvchi haqida fikringizni qoldiring..."></textarea>
+                            {% endif %}
                         </div>
                         <div class="col-12 text-end">
-                            <button type="submit" class="btn btn-primary rounded-pill px-4 btn-sm fw-bold">
+                            <button type="submit" class="btn btn-action-purple px-4 btn-sm fw-bold">
                                 Izoh qoldirish
                             </button>
                         </div>
                     </div>
                 </form>
             {% else %}
-                <div class="alert alert-warning text-center border mb-4">
-                    Izoh va baho qoldirish uchun <a href="{% url 'accounts:login' %}" class="fw-bold">tizimga kiring</a>.
+                <div class="alert alert-warning bg-dark text-warning border-warning text-center mb-4 rounded-3">
+                    Izoh va baho qoldirish uchun <a href="{% url 'accounts:login' %}" class="fw-bold text-info text-decoration-none">tizimga kiring</a>.
                 </div>
             {% endif %}
 
             <!-- IZOHLAR RO'YXATI -->
             <div class="reviews-list">
                 {% for review in reviews %}
-                    <div class="border-bottom py-3">
+                    <div class="review-item">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="text-dark">
-                                {% if review.user.get_full_name %}
-                                    {{ review.user.get_full_name }}
-                                {% else %}
-                                    {{ review.user.username }}
-                                {% endif %}
+                            <strong class="text-white">
+                                {{ review.user.get_full_name|default:review.user.username }}
                             </strong>
                             <span class="text-warning fw-bold">⭐ {{ review.rating }}</span>
                         </div>
-                        <p class="text-secondary mb-1" style="white-space: pre-line;">{{ review.comment }}</p>
-                        <small class="text-muted" style="font-size: 0.75rem;">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                        <p class="text-slate-300 mb-1" style="white-space: pre-line;">{{ review.text|default:review.comment }}</p>
+                        <small class="text-secondary" style="font-size: 0.75rem;">{{ review.created_at|date:"d.m.Y H:i" }}</small>
                     </div>
                 {% empty %}
-                    <p class="text-muted text-center py-3 mb-0">Hali hech kim izoh qoldirmagan. Birinchi bo'lib siz izoh qoldiring!</p>
+                    <p class="text-secondary text-center py-3 mb-0">Hali hech kim izoh qoldirmagan. Birinchi bo'lib siz izoh qoldiring!</p>
                 {% endfor %}
             </div>
         </div>
@@ -113,38 +253,67 @@
 
     <!-- O'ng tomon: Sotuvchi ma'lumotlari va Chat -->
     <div class="col-lg-4">
-        <div class="card card-custom p-4 text-center mb-4">
-            <h5 class="fw-bold mb-3">Sotuvchi</h5>
+        <div class="glass-card text-center mb-4">
+            <h5 class="fw-bold mb-3 text-secondary">Sotuvchi</h5>
             
-            {% if product.seller.profile.avatar %}
-                <img src="{{ product.seller.profile.avatar.url }}" class="rounded-circle mx-auto mb-2" style="width: 80px; height: 80px; object-fit: cover;">
-            {% else %}
-                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-2 fw-bold" style="width: 80px; height: 80px; font-size: 24px;">
-                    {{ product.seller.username|slice:":1"|upper }}
-                </div>
-            {% endif %}
+            <div class="d-flex justify-content-center mb-3">
+                {% if product.seller.avatar %}
+                    <img src="{{ product.seller.avatar.url }}" class="rounded-circle border border-2 border-info" style="width: 80px; height: 80px; object-fit: cover;">
+                {% else %}
+                    <div class="seller-avatar-wrapper mx-auto">
+                        {{ product.seller.username|first|upper }}
+                    </div>
+                {% endif %}
+            </div>
 
-            <h5 class="fw-bold mb-0">{{ product.seller.get_full_name|default:product.seller.username }}</h5>
-            <p class="text-muted small mb-3">@{{ product.seller.username }}</p>
+            <h5 class="fw-bold mb-0 text-white">{{ product.seller.get_full_name|default:product.seller.username }}</h5>
+            <p class="text-secondary small mb-4">@{{ product.seller.username }}</p>
 
-            <!-- E'londa ko'rsatilgan telefon raqami -->
-            {% if product.phone_number %}
-                <a href="tel:{{ product.phone_number }}" class="btn btn-success w-100 mb-2 fw-bold">📞 {{ product.phone_number }}</a>
-            {% elif product.seller.phone %}
-                <a href="tel:{{ product.seller.phone }}" class="btn btn-success w-100 mb-2 fw-bold">📞 {{ product.seller.phone }}</a>
-            {% endif %}
+            <div class="d-grid gap-2">
+                <!-- TELEFON RAQAM -->
+                {% if product.phone_number %}
+                    <a href="tel:{{ product.phone_number }}" class="btn btn-action-green py-2">
+                        <i class="bi bi-telephone-fill me-2"></i> {{ product.phone_number }}
+                    </a>
+                {% elif product.seller.phone_number %}
+                    <a href="tel:{{ product.seller.phone_number }}" class="btn btn-action-green py-2">
+                        <i class="bi bi-telephone-fill me-2"></i> {{ product.seller.phone_number }}
+                    </a>
+                {% elif product.seller.phone %}
+                    <a href="tel:{{ product.seller.phone }}" class="btn btn-action-green py-2">
+                        <i class="bi bi-telephone-fill me-2"></i> {{ product.seller.phone }}
+                    </a>
+                {% endif %}
 
-            <!-- Sayt ichidagi Chat tugmasi -->
-            {% if user.is_authenticated and user != product.seller %}
-                <a href="{% url 'chat:start_dialog' product.id %}" class="btn btn-primary w-100 mb-2 fw-bold">💬 Chat orqali yozish</a>
-            {% endif %}
+                <!-- SAYT ICHIDAGI CHAT -->
+                {% if user.is_authenticated %}
+                    {% if user != product.seller %}
+                        <a href="{% url 'chat:start_dialog' product.id %}" class="btn btn-action-purple py-2">
+                            <i class="bi bi-chat-dots me-2"></i> Sotuvchiga yozish
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-action-purple py-2">
+                        <i class="bi bi-chat-dots me-2"></i> Sotuvchiga yozish (Kirish)
+                    </a>
+                {% endif %}
 
-            <!-- Telegram orqali yozish -->
-            {% if product.seller.telegram_username %}
-                <a href="https://t.me/{{ product.seller.telegram_username }}" target="_blank" class="btn btn-outline-primary w-100 mb-2">💬 Telegram orqali yozish</a>
-            {% endif %}
+                <!-- SAVATGA QO'SHISH -->
+                <a href="{% url 'products:cart_add' product.id %}" class="btn btn-action-outline py-2">
+                    <i class="bi bi-cart-plus me-2"></i> Savatga qo'shish
+                </a>
 
-            <a href="{% url 'accounts:seller_store' product.seller.username %}" class="btn btn-outline-dark btn-sm w-100 mt-2">Sotuvchining barcha e'lonlari</a>
+                <!-- TELEGRAM USERNAME -->
+                {% if product.seller.telegram_username %}
+                    <a href="https://t.me/{{ product.seller.telegram_username }}" target="_blank" class="btn btn-action-outline py-2">
+                        <i class="bi bi-telegram me-2"></i> Telegram orqali yozish
+                    </a>
+                {% endif %}
+
+                <a href="{% url 'accounts:seller_store' product.seller.username %}" class="btn btn-action-outline py-2 mt-2">
+                    Sotuvchining barcha e'lonlari
+                </a>
+            </div>
         </div>
     </div>
 </div>

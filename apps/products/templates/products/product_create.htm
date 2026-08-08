@@ -1,0 +1,32 @@
+<!-- Avtomobil Ma'lumotlari Bo'limi -->
+<div class="card p-3 mb-3 border-0 bg-light rounded-3">
+    <h5 class="fw-bold mb-3">🚗 Avtomobil ma'lumotlari (Avto e'lonlar uchun)</h5>
+    
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label font-weight-bold">Chiqarilgan yili</label>
+            {{ form.auto_year }}
+            {% if form.auto_year.errors %}
+                <div class="text-danger small">{{ form.auto_year.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Yurgan masofasi (km)</label>
+            {{ form.auto_mileage }}
+            {% if form.auto_mileage.errors %}
+                <div class="text-danger small">{{ form.auto_mileage.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Yoqilg'i turi</label>
+            {{ form.auto_fuel_type }}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Uzatmalar qutisi (Korobka)</label>
+            {{ form.auto_transmission }}
+        </div>
+    </div>
+</div>

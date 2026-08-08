@@ -1,37 +1,377 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 
-{% block title %}Yangi E'lon Qo'shish | Marketplace{% endblock %}
+{% block title %}Yangi E'lon Joylash — Bozorix{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center py-4">
-    <div class="col-md-8">
-        
-        <!-- Ogohlantirish Banti -->
-        <div class="alert alert-warning border-warning shadow-sm d-flex align-items-start gap-3 mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-3 text-warning flex-shrink-0"></i>
-            <div>
-                <h5 class="alert-heading fw-bold mb-1">Diqqat! Muhim ogohlantirish</h5>
-                <p class="mb-0 small text-dark">
-                    Sayt ma'muriyati (Admin) e'londa ko'rsatilgan ma'lumotlarning to'g'riligi, mahsulot sifati va oldi-sotdi kelishuvlari uchun <strong>javobgarlikni o'z zimmasiga olmaydi</strong>. Firibgarlardan ogoh bo'ling va to'lovlarni oldindan o'tkazmang!
-                </p>
-            </div>
-        </div>
+<style>
+    .create-card {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        padding: 36px;
+        color: #ffffff;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
 
-        <div class="card p-4 shadow-sm">
-            <h3 class="fw-bold mb-4">Yangi E'lon Joylash</h3>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form|crispy }}
+    .form-header-badge {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        color: #a78bfa;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 10px 20px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Input, Select va Textarea stillari */
+    .create-card .form-control, 
+    .create-card .form-select {
+        background-color: rgba(30, 41, 59, 0.8) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+    }
+
+    .create-card .form-control::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    .create-card .form-control:focus, 
+    .create-card .form-select:focus {
+        background-color: rgba(15, 23, 42, 0.95) !important;
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .create-card select option {
+        background-color: #0f172a;
+        color: #ffffff;
+    }
+
+    /* Dinamik kartalar stili */
+    .dynamic-sec-card {
+        background: rgba(30, 41, 59, 0.5) !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(10px);
+    }
+
+    /* File Input */
+    .create-card input[type="file"]::file-selector-button {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        padding: 6px 16px;
+        border-radius: 8px;
+        margin-right: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .create-card input[type="file"]::file-selector-button:hover {
+        opacity: 0.9;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: none;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        color: #ffffff !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.95;
+        box-shadow: 0 0 25px rgba(139, 92, 246, 0.5);
+        transform: translateY(-1px);
+    }
+
+    .section-title {
+        color: #a78bfa;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-8">
+            <div class="create-card">
                 
-                <div class="mb-3">
-                    <label class="form-label fw-bold mt-2">Mahsulot rasmlarini yuklang:</label>
-                    <input type="file" name="images" class="form-control" multiple accept="image/*" required>
+                <!-- SARLAVHA -->
+                <div class="text-center mb-4">
+                    <span class="form-header-badge">
+                        <i class="bi bi-plus-circle-fill"></i> Yangi E'lon Joylash
+                    </span>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 mt-3 fs-5 fw-bold">E'lonni chop etish</button>
-            </form>
+                <form method="post" enctype="multipart/form-data" id="productForm">
+                    {% csrf_token %}
+
+                    <!-- 1. ASOSIY MA'LUMOTLAR -->
+                    <div class="section-title">
+                        📌 Asosiy ma'lumotlar
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">E'lon sarlavhasi*</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Kategoriya*</label>
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary">Holati*</label>
+                            {{ form.condition }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-secondary">Narxi (so'mda)*</label>
+                        {{ form.price }}
+                    </div>
+
+                    <!-- 2. DINAMIK QO'SHIMCHA BO'LIMLAR -->
+
+                    <!-- 🚗 AVTOMOBIL BO'LIMI -->
+                    <div id="sec_avto" class="card dynamic-sec-card p-3 mb-3 d-none border-warning border-opacity-50">
+                        <h6 class="fw-bold text-warning mb-3">🚗 Avtomobil ko'rsatkichlari</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.auto_year.label }}</label>
+                                {{ form.auto_year }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.auto_mileage.label }}</label>
+                                {{ form.auto_mileage }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.auto_fuel.label }}</label>
+                                {{ form.auto_fuel }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.auto_transmission.label }}</label>
+                                {{ form.auto_transmission }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 📱 TELEFON VA ELEKTRONIKA BO'LIMI -->
+                    <div id="sec_tech" class="card dynamic-sec-card p-3 mb-3 d-none border-info border-opacity-50">
+                        <h6 class="fw-bold text-info mb-3">📱 Texnika / Telefon xususiyatlari</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">{{ form.tech_brand.label }}</label>
+                                {{ form.tech_brand }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">{{ form.tech_memory.label }}</label>
+                                {{ form.tech_memory }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">{{ form.tech_color.label }}</label>
+                                {{ form.tech_color }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🏠 KO'CHMAS MULK BO'LIMI -->
+                    <div id="sec_home" class="card dynamic-sec-card p-3 mb-3 d-none border-danger border-opacity-50">
+                        <h6 class="fw-bold text-danger mb-3">🏠 Ko'chmas mulk ma'lumotlari</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">{{ form.home_rooms.label }}</label>
+                                {{ form.home_rooms }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">{{ form.home_area.label }}</label>
+                                {{ form.home_area }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">{{ form.home_floor.label }}</label>
+                                {{ form.home_floor }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🍏 OZIQ-OVQAT BO'LIMI -->
+                    <div id="sec_food" class="card dynamic-sec-card p-3 mb-3 d-none border-success border-opacity-50">
+                        <h6 class="fw-bold text-success mb-3">🍏 Oziq-ovqat va Qishloq xo'jaligi</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.food_weight.label }}</label>
+                                {{ form.food_weight }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.food_expiry.label }}</label>
+                                {{ form.food_expiry }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 👕 KIYIM BO'LIMI -->
+                    <div id="sec_clothing" class="card dynamic-sec-card p-3 mb-3 d-none border-info border-opacity-50">
+                        <h6 class="fw-bold text-info mb-3">👕 Kiyim va Poyabzal</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.clothing_size.label }}</label>
+                                {{ form.clothing_size }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.clothing_gender.label }}</label>
+                                {{ form.clothing_gender }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🛋️ MEBEL BO'LIMI -->
+                    <div id="sec_furniture" class="card dynamic-sec-card p-3 mb-3 d-none border-secondary border-opacity-50">
+                        <h6 class="fw-bold text-secondary mb-3">🛋️ Mebel va Uy jihozlari</h6>
+                        <div class="mb-2">
+                            <label class="form-label small text-secondary">{{ form.furniture_material.label }}</label>
+                            {{ form.furniture_material }}
+                        </div>
+                    </div>
+
+                    <!-- 🛠️ XIZMATLAR BO'LIMI -->
+                    <div id="sec_service" class="card dynamic-sec-card p-3 mb-3 d-none border-primary border-opacity-50">
+                        <h6 class="fw-bold text-primary mb-3">🛠️ Xizmat ko'rsatish</h6>
+                        <div class="mb-2">
+                            <label class="form-label small text-secondary">{{ form.service_type.label }}</label>
+                            {{ form.service_type }}
+                        </div>
+                    </div>
+
+                    <!-- 🐶 UY HAYVONLARI BO'LIMI -->
+                    <div id="sec_pet" class="card dynamic-sec-card p-3 mb-3 d-none border-warning border-opacity-50">
+                        <h6 class="fw-bold text-warning mb-3">🐶 Uy hayvonlari</h6>
+                        <div class="mb-2">
+                            <label class="form-label small text-secondary">{{ form.pet_age.label }}</label>
+                            {{ form.pet_age }}
+                        </div>
+                    </div>
+
+                    <!-- 💼 ISH O'RINLARI BO'LIMI -->
+                    <div id="sec_job" class="card dynamic-sec-card p-3 mb-3 d-none border-primary border-opacity-50">
+                        <h6 class="fw-bold text-primary mb-3">💼 Ish / Vakansiya</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.job_salary.label }}</label>
+                                {{ form.job_salary }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">{{ form.job_type.label }}</label>
+                                {{ form.job_type }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ⚽ SPORT BO'LIMI -->
+                    <div id="sec_sport" class="card dynamic-sec-card p-3 mb-3 d-none border-success border-opacity-50">
+                        <h6 class="fw-bold text-success mb-3">⚽ Sport va Xobbi</h6>
+                        <div class="mb-2">
+                            <label class="form-label small text-secondary">{{ form.sport_category.label }}</label>
+                            {{ form.sport_category }}
+                        </div>
+                    </div>
+
+                    <!-- 3. TAVSIF VA RASMLAR -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Batafsil tavsif*</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-secondary">Mahsulot rasmlarini yuklang</label>
+                        <input type="file" name="images" multiple class="form-control" accept="image/*">
+                        <div class="form-text text-secondary small mt-1">Bir nechta rasm tanlashingiz mumkin.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-submit w-100">
+                        🚀 E'lonni Chop Etish
+                    </button>
+                </form>
+
+            </div>
         </div>
     </div>
 </div>
+
+<!-- DINAMIK ALMASHTIRISH SCRIPT-I -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Django form'dagi select elementiga avtomatik id beriladi yoki nomi bo'yicha olinadi
+    const categorySelect = document.getElementById('id_category') || document.querySelector('select[name="category"]');
+    
+    // Barcha dinamik bo'limlar ro'yxati
+    const sections = [
+        document.getElementById('sec_avto'),
+        document.getElementById('sec_tech'),
+        document.getElementById('sec_home'),
+        document.getElementById('sec_food'),
+        document.getElementById('sec_clothing'),
+        document.getElementById('sec_furniture'),
+        document.getElementById('sec_service'),
+        document.getElementById('sec_pet'),
+        document.getElementById('sec_job'),
+        document.getElementById('sec_sport')
+    ];
+
+    function updateVisibility() {
+        if (!categorySelect) return;
+        
+        // Tanlangan kategoriya matnini olish
+        const selectedText = categorySelect.options[categorySelect.selectedIndex]?.text.toLowerCase() || '';
+
+        // Avval hamma qo'shimcha bo'limlarni yashirish
+        sections.forEach(sec => {
+            if (sec) sec.classList.add('d-none');
+        });
+
+        // Tanlangan kategoriyaga qarab mos blokni ochish
+        if (selectedText.includes('avto') || selectedText.includes('avtomobil') || selectedText.includes('mashina')) {
+            document.getElementById('sec_avto')?.classList.remove('d-none');
+        } else if (selectedText.includes('telefon') || selectedText.includes('elektronika') || selectedText.includes('texnika')) {
+            document.getElementById('sec_tech')?.classList.remove('d-none');
+        } else if (selectedText.includes('mulk') || selectedText.includes('uy') || selectedText.includes('kvartira')) {
+            document.getElementById('sec_home')?.classList.remove('d-none');
+        } else if (selectedText.includes('oziq') || selectedText.includes('ovqat') || selectedText.includes('qishloq')) {
+            document.getElementById('sec_food')?.classList.remove('d-none');
+        } else if (selectedText.includes('kiyim') || selectedText.includes('poyabzal')) {
+            document.getElementById('sec_clothing')?.classList.remove('d-none');
+        } else if (selectedText.includes('mebel')) {
+            document.getElementById('sec_furniture')?.classList.remove('d-none');
+        } else if (selectedText.includes('xizmat')) {
+            document.getElementById('sec_service')?.classList.remove('d-none');
+        } else if (selectedText.includes('hayvon')) {
+            document.getElementById('sec_pet')?.classList.remove('d-none');
+        } else if (selectedText.includes('ish')) {
+            document.getElementById('sec_job')?.classList.remove('d-none');
+        } else if (selectedText.includes('sport') || selectedText.includes('xobbi')) {
+            document.getElementById('sec_sport')?.classList.remove('d-none');
+        }
+    }
+
+    if (categorySelect) {
+        categorySelect.addEventListener('change', updateVisibility);
+        updateVisibility(); // Sahifa yuklanganda ham tekshirish
+    }
+});
+</script>
 {% endblock %}

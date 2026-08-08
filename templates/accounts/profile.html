@@ -1,53 +1,209 @@
 {% extends 'base.html' %}
 
-{% block title %}Shaxsiy Kabinet — Marketplace{% endblock %}
+{% block title %}Shaxsiy Kabinet — Bozorix{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <!-- Tepaqismi (Header) -->
-                <div class="bg-primary text-white p-4 text-center">
-                    <div class="mb-3">
-                        {% if profile.avatar %}
-                            <img src="{{ profile.avatar.url }}" alt="{{ request.user.username }}" class="rounded-circle img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
-                        {% else %}
-                            <div class="rounded-circle bg-white text-primary d-inline-flex align-items-center justify-content-center fw-bold fs-1" style="width: 100px; height: 100px;">
-                                {{ request.user.username|slice:":1"|upper }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    <h4 class="fw-bold mb-1">{{ request.user.get_full_name|default:request.user.username }}</h4>
-                    <p class="mb-0 opacity-75">@{{ request.user.username }}</p>
-                </div>
+<style>
+    /* Barcha kontrastli va yorqin ranglar */
+    .profile-card {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
 
-                <!-- Ma'lumotlar qismi -->
-                <div class="card-body p-4">
-                    <div class="list-group list-group-flush mb-4">
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                            <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email:</span>
-                            <span class="fw-semibold text-dark">{{ request.user.email|default:"Kiritilmagan" }}</span>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                            <span class="text-muted"><i class="bi bi-telephone me-2"></i>Telefon:</span>
-                            <span class="fw-semibold text-dark">{{ profile.phone_number|default:"Kiritilmagan" }}</span>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                            <span class="text-muted"><i class="bi bi-geo-alt me-2"></i>Manzil:</span>
-                            <span class="fw-semibold text-dark">{{ profile.address|default:"Kiritilmagan" }}</span>
-                        </div>
-                    </div>
+    .profile-banner {
+        height: 120px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        position: relative;
+    }
 
-                    <!-- Amallar tugmalari -->
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary rounded-pill fw-medium py-2">
-                            <i class="bi bi-pencil-square me-1"></i> Profilni tahrirlash
-                        </a>
-                    </div>
-                </div>
+    .avatar-wrapper {
+        position: relative;
+        margin-top: -60px;
+        display: inline-block;
+    }
+
+    .profile-avatar {
+        width: 110px;
+        height: 110px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #0f172a;
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+        background: #1e293b;
+    }
+
+    .avatar-placeholder {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 4px solid #0f172a;
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+        background: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 2.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .profile-info-list {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+    }
+
+    .info-item {
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    /* O'qilish unumdorligi yuqori yorqin ranglar */
+    .info-label {
+        color: #94a3b8 !important; /* Yorqin kulrang */
+        font-size: 0.92rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-value {
+        color: #ffffff !important; /* Aniq va tiniq oq */
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .text-username-sub {
+        color: #cbd5e1 !important; /* Aniq ko'rinadigan username rangi */
+        font-size: 0.875rem;
+    }
+
+    .text-empty-val {
+        color: #f87171 !important; /* Kiritilmagan bo'lsa qizg'ish neon */
+        font-weight: 500;
+    }
+
+    .btn-edit-profile {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        color: #ffffff !important;
+        border: none;
+        border-radius: 14px;
+        padding: 12px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .btn-edit-profile:hover {
+        opacity: 0.95;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 0 30px rgba(217, 70, 239, 0.6);
+    }
+</style>
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="profile-card">
+            
+            <!-- Banner / Header -->
+            <div class="profile-banner d-flex align-items-end justify-content-end p-3">
+                <span class="badge bg-dark border border-info text-info px-3 py-2 rounded-pill">
+                    <i class="bi bi-shield-check me-1"></i> Tasdiqlangan profil
+                </span>
             </div>
+
+            <!-- Avatar va Ism qismi -->
+            <div class="text-center px-4 pb-4">
+                <div class="avatar-wrapper mb-3">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="{{ request.user.username }}" class="profile-avatar">
+                    {% elif user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ request.user.username }}" class="profile-avatar">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ request.user.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <h4 class="fw-bold text-white mb-1">
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </h4>
+                <p class="text-username-sub mb-4">@{{ request.user.username }}</p>
+
+                <!-- Ma'lumotlar bloki -->
+                <div class="profile-info-list text-start mb-4">
+                    <!-- EMAIL -->
+                    <div class="info-item">
+                        <span class="info-label"><i class="bi bi-envelope text-info fs-6"></i> Email:</span>
+                        <span class="info-value">
+                            {% if request.user.email %}
+                                {{ request.user.email }}
+                            {% elif profile.email %}
+                                {{ profile.email }}
+                            {% else %}
+                                <span class="text-empty-val">Kiritilmagan</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- TELEFON -->
+                    <div class="info-item">
+                        <span class="info-label"><i class="bi bi-telephone text-warning fs-6"></i> Telefon:</span>
+                        <span class="info-value">
+                            {% if profile.phone_number %}
+                                {{ profile.phone_number }}
+                            {% elif profile.phone %}
+                                {{ profile.phone }}
+                            {% elif request.user.phone %}
+                                {{ request.user.phone }}
+                            {% elif request.user.phone_number %}
+                                {{ request.user.phone_number }}
+                            {% else %}
+                                <span class="text-empty-val">Kiritilmagan</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- MANZIL -->
+                    <div class="info-item">
+                        <span class="info-label"><i class="bi bi-geo-alt text-danger fs-6"></i> Manzil:</span>
+                        <span class="info-value">
+                            {% if profile.address %}
+                                {{ profile.address }}
+                            {% elif request.user.address %}
+                                {{ request.user.address }}
+                            {% else %}
+                                <span class="text-empty-val">Kiritilmagan</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Tahrirlash tugmasi -->
+                <a href="{% url 'accounts:profile_edit' %}" class="btn-edit-profile w-100">
+                    <i class="bi bi-pencil-square me-2"></i> Profilni tahrirlash
+                </a>
+            </div>
+
         </div>
     </div>
 </div>
-{% endblock %}nikm
+{% endblock %}

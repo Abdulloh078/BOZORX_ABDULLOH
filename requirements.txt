@@ -1,8 +1,11 @@
 asgiref==3.12.1
 crispy-bootstrap5==2026.3
-Django==6.0.7
-django-crispy-forms==2.6
+Django==5.2.16
+django-cors-headers==4.9.0
+django-crispy-forms==2.7
+djangorestframework==3.17.1
 pillow==12.3.0
-python-decouple==3.8
 sqlparse==0.5.5
-tzdata==2026.3
+typing_extensions==4.16.0
+pip install gunicorn psycopg2-binary dj-database-url whitenoise
+pip freeze > requirements.txt

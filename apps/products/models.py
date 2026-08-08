@@ -2,6 +2,33 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
+from django.urls import reverse
+
+
+def generate_unique_slug(model_class, text, instance=None):
+    """
+    Kategoriya va Mahsulotlar uchun takrorlanmas (unique) slug generatsiya qiladi.
+    """
+    base_slug = slugify(text)
+    if not base_slug:
+        base_slug = 'item'
+        
+    slug = base_slug
+    count = 1
+    
+    # Baza ichida ushbu slug mavjudligini tekshirish
+    qs = model_class.objects.filter(slug=slug)
+    if instance and instance.pk:
+        qs = qs.exclude(pk=instance.pk)
+        
+    while qs.exists():
+        slug = f"{base_slug}-{count}"
+        qs = model_class.objects.filter(slug=slug)
+        if instance and instance.pk:
+            qs = qs.exclude(pk=instance.pk)
+        count += 1
+        
+    return slug
 
 
 class Category(models.Model):
@@ -9,8 +36,15 @@ class Category(models.Model):
     Iyerarxik Kategoriya Modeli (Parent-Child)
     """
     name = models.CharField('Kategoriya nomi', max_length=100)
-    slug = models.SlugField('URL Slug', unique=True, blank=True)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children', verbose_name='Ota kategoriya')
+    slug = models.SlugField('URL Slug', max_length=120, unique=True, blank=True)
+    parent = models.ForeignKey(
+        'self', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='children', 
+        verbose_name='Ota kategoriya'
+    )
     icon = models.CharField('FontAwesome/Bootstrap Ikonka sinfi', max_length=50, blank=True, help_text="Masalan: bi bi-laptop")
     image = models.ImageField('Kategoriya rasmi', upload_to='categories/', blank=True, null=True)
 
@@ -20,9 +54,14 @@ class Category(models.Model):
         ordering = ['name']
 
     def save(self, *args, **kwargs):
+        # Slug bo'sh bo'lsa yoki nomi o'zgarganda avtomatik unikal slug beradi
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = generate_unique_slug(Category, self.name, instance=self)
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        """Kategoriya uchun avtomatik va xatosiz URL qaytaradi"""
+        return reverse('products:product_list_by_category', kwargs={'category_slug': self.slug})
 
     def __str__(self):
         full_path = [self.name]
@@ -43,10 +82,7 @@ class Product(models.Model):
         REFURBISHED = 'REFURBISHED', 'Tiklangani (Refurbished)'
 
     class Status(models.TextChoices):
-        DRAFT = 'DRAFT', 'Qoralama'
-        PENDING = 'PENDING', 'Tekshiruvda (Moderatsiya)'
         ACTIVE = 'ACTIVE', 'Faol'
-        REJECTED = 'REJECTED', 'Radd etilgan'
         SOLD = 'SOLD', 'Sotilgan'
 
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='products', verbose_name='Sotuvchi')
@@ -60,13 +96,11 @@ class Product(models.Model):
     phone_number = models.CharField('Aloqa uchun tel. raqam', max_length=20, blank=True, null=True, help_text="Masalan: +998901234567")
 
     condition = models.CharField('Holati', max_length=20, choices=Condition.choices, default=Condition.USED)
-    status = models.CharField('E\'lon holati', max_length=20, choices=Status.choices, default=Status.PENDING)
+    status = models.CharField('E\'lon holati', max_length=20, choices=Status.choices, default=Status.ACTIVE)
     
-    # Joylashuv
     region = models.CharField('Viloyat', max_length=100)
     city = models.CharField('Tuman / Shahar', max_length=100)
     
-    # Reklama statuslari (Top / VIP)
     is_vip = models.BooleanField('VIP e\'lon', default=False)
     is_top = models.BooleanField('TOP e\'lon', default=False)
     views_count = models.PositiveIntegerField('Ko\'rishlar soni', default=0)
@@ -81,13 +115,7 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.title)
-            slug = base_slug
-            count = 1
-            while Product.objects.filter(slug=slug).exists():
-                slug = f"{base_slug}-{count}"
-                count += 1
-            self.slug = slug
+            self.slug = generate_unique_slug(Product, self.title, instance=self)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -95,9 +123,6 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
-    """
-    Mahsulotning ko'p sonli rasmlari
-    """
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name='Mahsulot')
     image = models.ImageField('Rasm', upload_to='products/%Y/%m/')
     is_main = models.BooleanField('Asosiy rasm', default=False)
@@ -109,9 +134,6 @@ class ProductImage(models.Model):
 
 
 class Review(models.Model):
-    """
-    Mahsulotga qoldirilgan izoh va baho (Rating)
-    """
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews', verbose_name='Mahsulot')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews', verbose_name='Foydalanuvchi')
     rating = models.PositiveSmallIntegerField('Baho', default=5, validators=[MinValueValidator(1), MaxValueValidator(5)])
@@ -128,9 +150,6 @@ class Review(models.Model):
 
 
 class Favorite(models.Model):
-    """
-    Saralangan (Yoqtirilgan) e'lonlar
-    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorites', verbose_name='Foydalanuvchi')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='favorited_by', verbose_name='Mahsulot')
     created_at = models.DateTimeField('Qo\'shilgan vaqti', auto_now_add=True)

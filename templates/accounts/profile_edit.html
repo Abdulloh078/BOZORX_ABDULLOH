@@ -1,51 +1,205 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Profilni Tahrirlash — Marketplace{% endblock %}
+{% block title %}Profilni Tahrirlash — Bozorix{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<style>
+    :root {
+        --bg-main: #0f172a;
+        --card-bg: rgba(30, 41, 59, 0.85);
+        --card-border: rgba(255, 255, 255, 0.12);
+        --accent-neon: #6366f1;
+        --accent-glow: rgba(99, 102, 241, 0.35);
+        --accent-cyan: #38bdf8;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+    }
+
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+    }
+
+    /* Glassmorphism Card Container */
+    .edit-profile-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+
+    /* Header styling */
+    .profile-header {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(56, 189, 248, 0.1));
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    /* Section Headers inside Form */
+    .section-title {
+        color: var(--accent-cyan);
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Crispy Form elements styling override */
+    .custom-crispy-dark label {
+        color: var(--text-secondary) !important;
+        font-size: 0.88rem;
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+    }
+
+    .custom-crispy-dark input[type="text"],
+    .custom-crispy-dark input[type="email"],
+    .custom-crispy-dark input[type="tel"],
+    .custom-crispy-dark textarea,
+    .custom-crispy-dark select {
+        background-color: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid var(--card-border) !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+        padding: 0.65rem 1rem !important;
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+    }
+
+    .custom-crispy-dark input:focus,
+    .custom-crispy-dark textarea:focus,
+    .custom-crispy-dark select:focus {
+        border-color: var(--accent-neon) !important;
+        box-shadow: 0 0 12px var(--accent-glow) !important;
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        outline: none;
+    }
+
+    /* File Input Styling */
+    .custom-crispy-dark input[type="file"] {
+        background-color: rgba(15, 23, 42, 0.75) !important;
+        border: 1px dashed var(--card-border) !important;
+        color: var(--text-secondary) !important;
+        border-radius: 10px !important;
+        padding: 0.5rem !important;
+    }
+
+    .custom-crispy-dark input[type="file"]::-webkit-file-upload-button {
+        background: linear-gradient(135deg, var(--accent-neon), #0284c7);
+        color: white;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-right: 10px;
+        transition: all 0.2s;
+    }
+
+    .custom-crispy-dark input[type="file"]::-webkit-file-upload-button:hover {
+        opacity: 0.9;
+    }
+
+    /* Current File Link & Text */
+    .custom-crispy-dark a {
+        color: var(--accent-cyan) !important;
+        text-decoration: none;
+    }
+
+    .custom-crispy-dark a:hover {
+        text-decoration: underline;
+    }
+
+    .custom-crispy-dark .form-text,
+    .custom-crispy-dark .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    /* Buttons */
+    .btn-save {
+        background: linear-gradient(135deg, var(--accent-neon), #0284c7);
+        color: #ffffff;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+
+    .btn-save:hover {
+        box-shadow: 0 0 20px var(--accent-glow);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--card-border);
+        color: var(--text-secondary);
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+</style>
+
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="col-md-9 col-lg-7 col-xl-6">
+            
+            <div class="edit-profile-card">
                 
                 <!-- Card Header -->
-                <div class="bg-primary text-white p-4 text-center">
-                    <h4 class="fw-bold mb-1"><i class="bi bi-pencil-square me-2"></i>Profilni tahrirlash</h4>
-                    <p class="mb-0 opacity-75">Shaxsiy ma'lumotlaringizni yangilang</p>
+                <div class="profile-header p-4 text-center">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-3 mb-2" style="background: rgba(99, 102, 241, 0.15);">
+                        <i class="bi bi-person-gear fs-2" style="color: var(--accent-cyan);"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1 text-white">Profilni tahrirlash</h4>
+                    <p class="mb-0 text-light opacity-75 small">Shaxsiy va tizim ma'lumotlaringizni yangilang</p>
                 </div>
 
                 <!-- Form Body -->
-                <div class="card-body p-4">
+                <div class="p-4 p-md-5 custom-crispy-dark">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         <!-- User ma'lumotlari formasi -->
-                        <div class="mb-3">
-                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Tizim ma'lumotlari</h6>
+                        <div class="mb-4">
+                            <div class="section-title border-bottom border-secondary border-opacity-25 pb-2 mb-3 d-flex align-items-center">
+                                <i class="bi bi-shield-lock me-2"></i> Tizim ma'lumotlari
+                            </div>
                             {{ u_form|crispy }}
                         </div>
 
-                        <!-- Profil qo'shimcha ma'lumotlari (Rasm, telefon va h.k.) -->
-                        <div class="mb-4">
-                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Shaxsiy ma'lumotlar</h6>
+                        <!-- Profil qo'shimcha ma'lumotlari -->
+                        <div class="mb-4 pt-2">
+                            <div class="section-title border-bottom border-secondary border-opacity-25 pb-2 mb-3 d-flex align-items-center">
+                                <i class="bi bi-card-heading me-2"></i> Shaxsiy ma'lumotlar
+                            </div>
                             {{ p_form|crispy }}
                         </div>
 
                         <!-- Tugmalar -->
-                        <div class="d-flex gap-2 pt-2">
-                            <a href="{% url 'accounts:profile' %}" class="btn btn-light border rounded-pill w-50 fw-medium">
+                        <div class="d-flex gap-3 pt-3 border-top border-secondary border-opacity-25 mt-4">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-cancel w-50 py-2.5 text-center d-flex align-items-center justify-content-center">
                                 Bekor qilish
                             </a>
-                            <button type="submit" class="btn btn-primary rounded-pill w-50 fw-medium py-2">
-                                Saqlash
+                            <button type="submit" class="btn btn-save w-50 py-2.5 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-check2-circle me-2 fs-5"></i> Saqlash
                             </button>
                         </div>
                     </form>
                 </div>
 
             </div>
+
         </div>
     </div>
 </div>
-{% endblock %}s
+{% endblock %}
