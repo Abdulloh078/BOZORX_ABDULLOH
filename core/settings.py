@@ -19,7 +19,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    
+    # Cloudinary django.contrib.staticfiles'dan yuqorida tursin
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
+
     'django.contrib.humanize',
 
     # Third Party Apps
@@ -100,16 +105,23 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static & Media Files
+# Static Files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# WhiteNoise orqali statik fayllarni siqish va keshlashtirish
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Media Files (Cloudinary storage backend)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Cloudinary sozlamalari (Render Environment Variables yoki shu yerga kalitlarni qo'yasiz)
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'your_cloud_name'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', 'your_api_key'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'your_api_secret'),
+}
 
 
 # Default Auto Field
@@ -129,8 +141,6 @@ LOGIN_REDIRECT_URL = 'products:product_list'
 LOGOUT_REDIRECT_URL = 'products:product_list'
 
 
-# --- MOBIL ILOVA VA REST API SOZLAMALARI ---
-
 # CORS (Mobil ilova so'rovlariga ruxsat berish)
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -144,8 +154,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
 }
-
-
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
