@@ -1,0 +1,66 @@
+[
+  {
+    "model": "products.category",
+    "pk": 1,
+    "fields": {
+      "name": "Elektronika va Texnika",
+      "slug": "elektronika-va-texnika"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 2,
+    "fields": {
+      "name": "Kiyim-kechak",
+      "slug": "kiyim-kechak"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 3,
+    "fields": {
+      "name": "Aksessuarlar",
+      "slug": "aksessuarlar"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 4,
+    "fields": {
+      "name": "Uy va Bog'",
+      "slug": "uy-va-bog"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 5,
+    "fields": {
+      "name": "Avtomobillar",
+      "slug": "avtomobillar"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 6,
+    "fields": {
+      "name": "Bolalar dunyosi",
+      "slug": "bolalar-dunyosi"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 7,
+    "fields": {
+      "name": "Ko'chmas mulk",
+      "slug": "kochmas-mulk"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 8,
+    "fields": {
+      "name": "Xizmatlar",
+      "slug": "xizmatlar"
+    }
+  }
+]
