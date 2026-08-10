@@ -2,65 +2,76 @@
   {
     "model": "products.category",
     "pk": 1,
-    "fields": {
-      "name": "Elektronika va Texnika",
-      "slug": "elektronika-va-texnika"
-    }
+    "fields": { "name": "Telefonlar va Gadjetlar", "slug": "telefonlar-va-gadjetlar" }
   },
   {
     "model": "products.category",
     "pk": 2,
-    "fields": {
-      "name": "Kiyim-kechak",
-      "slug": "kiyim-kechak"
-    }
+    "fields": { "name": "Avtomobillar va Transport", "slug": "avtomobillar-va-transport" }
   },
   {
     "model": "products.category",
     "pk": 3,
-    "fields": {
-      "name": "Aksessuarlar",
-      "slug": "aksessuarlar"
-    }
+    "fields": { "name": "Ko'chmas mulk (Uylar va Bino)", "slug": "kochmas-mulk" }
   },
   {
     "model": "products.category",
     "pk": 4,
-    "fields": {
-      "name": "Uy va Bog'",
-      "slug": "uy-va-bog"
-    }
+    "fields": { "name": "Noutbuklar va Kompyuterlar", "slug": "noutbuklar-va-kompyuterlar" }
   },
   {
     "model": "products.category",
     "pk": 5,
-    "fields": {
-      "name": "Avtomobillar",
-      "slug": "avtomobillar"
-    }
+    "fields": { "name": "Maishiy texnika", "slug": "maishiy-texnika" }
   },
   {
     "model": "products.category",
     "pk": 6,
-    "fields": {
-      "name": "Bolalar dunyosi",
-      "slug": "bolalar-dunyosi"
-    }
+    "fields": { "name": "Mebel va Uy-ro'zg'or buyumlari", "slug": "mebel-va-uy-rozgor" }
   },
   {
     "model": "products.category",
     "pk": 7,
-    "fields": {
-      "name": "Ko'chmas mulk",
-      "slug": "kochmas-mulk"
-    }
+    "fields": { "name": "Gözallik va Parvarish", "slug": "gozallik-va-parvarish" }
   },
   {
     "model": "products.category",
     "pk": 8,
-    "fields": {
-      "name": "Xizmatlar",
-      "slug": "xizmatlar"
-    }
+    "fields": { "name": "Bolalar dunyosi va O'yinchoqlar", "slug": "bolalar-dunyosi" }
+  },
+  {
+    "model": "products.category",
+    "pk": 9,
+    "fields": { "name": "Sport va Hordiq", "slug": "sport-va-hordiq" }
+  },
+  {
+    "model": "products.category",
+    "pk": 10,
+    "fields": { "name": "Avto ehtiyot qismlar va Aksessuarlar", "slug": "avto-ehtiyot-qismlar" }
+  },
+  {
+    "model": "products.category",
+    "pk": 11,
+    "fields": { "name": "Qurilish va Ta'mirlash", "slug": "qurilish-va-tamirlash" }
+  },
+  {
+    "model": "products.category",
+    "pk": 12,
+    "fields": { "name": "Kitoblar va Hobbi", "slug": "kitoblar-va-hobbi" }
+  },
+  {
+    "model": "products.category",
+    "pk": 13,
+    "fields": { "name": "Biznes va Sanoat uskunalari", "slug": "biznes-va-uskunalar" }
+  },
+  {
+    "model": "products.category",
+    "pk": 14,
+    "fields": { "name": "Uy hayvonlari va Ozuqalar", "slug": "uy-hayvonlari-va-ozuqalar" }
+  },
+  {
+    "model": "products.category",
+    "pk": 15,
+    "fields": { "name": "Xizmatlar va Ish o'rinlari", "slug": "xizmatlar-va-ish-orinlari" }
   }
 ]
